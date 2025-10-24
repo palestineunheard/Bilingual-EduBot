@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bilingual EduBot</title>
+    <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <script>
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Nastaliq+Urdu:wght@400;500;600;700&family=Lato:ital,wght@0,400;0,700;1,400&family=Merriweather:ital,wght@0,400;0,700;1,400&family=EB+Garamond:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reactflow@11.11.3/dist/style.css" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#1f2937" />
+    <style>
+      /* Styles for React Flow attribution */
+      .react-flow__attribution {
+        background: rgba(255, 255, 255, 0.1) !important;
+      }
+      .react-flow__attribution a {
+        color: #a5b4fc !important;
+      }
+      /* Styles for PDF export */
+      .mind-map-exporting .react-flow__controls,
+      .mind-map-exporting .react-flow__minimap,
+      .mind-map-exporting .export-button {
+        display: none;
+      }
+    </style>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+              urdu: ['Noto Nastaliq Urdu', 'serif'],
+              lato: ['Lato', 'sans-serif'],
+              merriweather: ['Merriweather', 'serif'],
+              garamond: ['EB Garamond', 'serif'],
+            },
+            keyframes: {
+              'fade-in': {
+                '0%': { opacity: '0' },
+                '100%': { opacity: '1' },
+              },
+            },
+            animation: {
+              'fade-in': 'fade-in 0.5s ease-out',
+            }
+          },
+        },
+      }
+    </script>
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://aistudiocdn.com/react@^19.1.1",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.1.1/",
+    "react/": "https://aistudiocdn.com/react@^19.1.1/",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.17.0",
+    "fuse.js": "https://aistudiocdn.com/fuse.js@^7.1.0",
+    "reactflow": "https://aistudiocdn.com/reactflow@^11.11.4",
+    "html-to-image": "https://aistudiocdn.com/html-to-image@^1.11.11",
+    "reactflow/": "https://aistudiocdn.com/reactflow@^11.11.4/",
+    "firebase/app": "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js",
+    "firebase/auth": "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js",
+    "firebase/firestore": "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js",
+    "firebase/": "https://aistudiocdn.com/firebase@^12.4.0/",
+    "@vercel/node": "https://aistudiocdn.com/@vercel/node@^5.5.0"
+  }
+}
+</script>
+</head>
+  <body class="bg-gray-900 text-white">
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>

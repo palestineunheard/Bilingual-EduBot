@@ -1,0 +1,48 @@
+
+[
+  {
+    "id": 1,
+    "question_en": "What is the capital of Pakistan?",
+    "question_ur": "پاکستان کا دارالحکومت کیا ہے؟",
+    "answer_en": "The capital of Pakistan is Islamabad.",
+    "answer_ur": "پاکستان کا دارالحکومت اسلام آباد ہے۔",
+    "keywords_en": ["capital", "pakistan", "islamabad"],
+    "keywords_ur": ["دارالحکومت", "پاکستان", "اسلام آباد"]
+  },
+  {
+    "id": 2,
+    "question_en": "Explain photosynthesis.",
+    "question_ur": "فوٹو سنتھیسس کی وضاحت کریں۔",
+    "answer_en": "Photosynthesis is the process used by plants, algae, and certain bacteria to harness energy from sunlight and turn it into chemical energy.",
+    "answer_ur": "فوٹو سنتھیسس وہ عمل ہے جسے پودے، کائی اور کچھ بیکٹیریا سورج کی روشنی سے توانائی حاصل کرنے اور اسے کیمیائی توانائی میں تبدیل کرنے کے لیے استعمال کرتے ہیں۔",
+    "keywords_en": ["plants", "sunlight", "energy", "science"],
+    "keywords_ur": ["پودے", "سورج کی روشنی", "توانائی", "سائنس"]
+  },
+  {
+    "id": 3,
+    "question_en": "What are the primary colors?",
+    "question_ur": "بنیادی رنگ کون سے ہیں؟",
+    "answer_en": "The primary colors in the additive color model (used for light) are Red, Green, and Blue (RGB). In the subtractive model (used for pigments), they are Cyan, Magenta, and Yellow (CMY). Traditionally, Red, Yellow, and Blue (RYB) are also taught.",
+    "answer_ur": "ایڈیٹیو کلر ماڈل (روشنی کے لیے استعمال ہونے والا) میں بنیادی رنگ سرخ، سبز اور نیلے (آر جی بی) ہیں۔ سبٹریکٹیو ماڈل (پگمنٹس کے لیے استعمال ہونے والا) میں یہ سیان، میجنٹا اور پیلا (سی ایم وائی) ہیں۔ روایتی طور پر سرخ، پیلا اور نیلا (آر وائی بی) بھی سکھائے جاتے ہیں۔",
+    "keywords_en": ["colors", "primary", "art", "rgb", "cmy"],
+    "keywords_ur": ["رنگ", "بنیادی", "آرٹ", "آر جی بی", "سی ایم وائی"]
+  },
+  {
+    "id": 4,
+    "question_en": "Who wrote the national anthem of Pakistan?",
+    "question_ur": "پاکستان کا قومی ترانہ کس نے لکھا؟",
+    "answer_en": "The national anthem of Pakistan, 'Pak Sarzamin', was written by Hafeez Jalandhari.",
+    "answer_ur": "پاکستان کا قومی ترانہ 'پاک سرزمین' حفیظ جالندھری نے لکھا تھا۔",
+    "keywords_en": ["national anthem", "pakistan", "hafeez jalandhari"],
+    "keywords_ur": ["قومی ترانہ", "پاکستان", "حفیظ جالندھری"]
+  },
+  {
+    "id": 5,
+    "question_en": "What is a good study tip?",
+    "question_ur": "پڑھائی کے لیے کوئی اچھی ٹپ بتائیں؟",
+    "answer_en": "One effective study tip is the Pomodoro Technique. You study for 25 minutes, then take a 5-minute break. After four 'Pomodoros,' take a longer break of 15-30 minutes. This helps maintain focus and prevent burnout.",
+    "answer_ur": "پڑھائی کی ایک مؤثر ٹپ پوموڈورو تکنیک ہے۔ آپ 25 منٹ تک پڑھائی کریں، پھر 5 منٹ کا وقفہ لیں۔ چار 'پوموڈورو' کے بعد، 15-30 منٹ کا لمبا وقفہ لیں۔ یہ توجہ مرکوز رکھنے اور تھکاوٹ سے بچنے میں مدد کرتا ہے۔",
+    "keywords_en": ["study", "tip", "pomodoro", "focus"],
+    "keywords_ur": ["پڑھائی", "ٹپ", "پوموڈورو", "توجہ"]
+  }
+]

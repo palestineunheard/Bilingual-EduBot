@@ -1,0 +1,7 @@
+{
+  "name": "Copy of Bilingual EduBot",
+  "description": "An educational Q&A chatbot that supports English and Urdu. It uses a local knowledge base, fuzzy search, and supports voice input/output.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
