@@ -259,13 +259,6 @@ export const BodyIcon: React.FC<IconProps> = ({ className = 'w-6 h-6' }) => (
     </svg>
 );
 
-// FIX: Add missing BriefcaseIcon for ResumeBuilder feature.
-export const BriefcaseIcon: React.FC<IconProps> = ({ className = 'w-5 h-5' }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 14.15v4.075c0 1.313-.964 2.446-2.25 2.712-1.285.266-2.505.266-3.79 0-1.286-.266-2.25-1.399-2.25-2.712V14.15m0 0a2.25 2.25 0 012.25-2.25h1.5a2.25 2.25 0 012.25 2.25m-7.5 0a2.25 2.25 0 00-2.25-2.25h-1.5a2.25 2.25 0 00-2.25 2.25m7.5 0v-4.505a2.25 2.25 0 00-2.25-2.25h-1.5a2.25 2.25 0 00-2.25 2.25v4.505m0 0a2.25 2.25 0 01-2.25-2.25h-1.5a2.25 2.25 0 01-2.25 2.25m-7.5 0v-4.505a2.25 2.25 0 012.25-2.25h1.5a2.25 2.25 0 012.25 2.25v4.505m0 0a2.25 2.25 0 002.25-2.25h1.5a2.25 2.25 0 002.25 2.25m-7.5 0h7.5" />
-    </svg>
-);
-
 export const EyeIcon: React.FC<IconProps> = ({ className = 'w-6 h-6' }) => (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.432 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />

@@ -20,11 +20,10 @@ import { CodeTutor } from './components/CodeTutor';
 import { PastPaperAnalyzer } from './components/PastPaperAnalyzer';
 import { VideoAnalyzer } from './components/VideoAnalyzer';
 import { AudioTranscriber } from './components/AudioTranscriber';
-import { ResumeBuilder } from './components/ResumeBuilder';
 import { Language } from './types';
 import { LogoutIcon, SpinnerIcon } from './components/icons';
 
-type View = 'chat' | 'notes' | 'vocabulary' | 'group' | 'exam' | 'whiteboard' | 'feedback' | 'roadmap' | 'imageToNotes' | 'story' | 'quiz' | 'translation' | 'fitness' | 'codetutor' | 'paperAnalyzer' | 'video' | 'transcriber' | 'resume';
+type View = 'chat' | 'notes' | 'vocabulary' | 'group' | 'exam' | 'whiteboard' | 'feedback' | 'roadmap' | 'imageToNotes' | 'story' | 'quiz' | 'translation' | 'fitness' | 'codetutor' | 'paperAnalyzer' | 'video' | 'transcriber';
 
 const App: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -73,7 +72,6 @@ const App: React.FC = () => {
       nav_paper_analyzer: "Paper Analyzer",
       nav_video: "Video Analyzer",
       nav_transcriber: "Audio Transcriber",
-      nav_resume: "Resume Builder",
       footer: "Bilingual EduBot © 2024. All rights reserved.",
       signOut: "Sign Out",
     },
@@ -95,7 +93,6 @@ const App: React.FC = () => {
       nav_paper_analyzer: "پرچہ تجزیہ کار",
       nav_video: "ویڈیو تجزیہ کار",
       nav_transcriber: "آڈیو ٹرانسکرائبر",
-      nav_resume: "ریزیومے بلڈر",
       footer: "دو لسانی ایجو بوٹ © 2024۔ جملہ حقوق محفوظ ہیں۔",
       signOut: "سائن آؤٹ",
     }
@@ -149,7 +146,6 @@ const App: React.FC = () => {
             <NavButton view="quiz" label={uiText[language].nav_quiz} />
             <NavButton view="roadmap" label={uiText[language].nav_roadmap} />
             <NavButton view="vocabulary" label={uiText[language].nav_vocab} />
-            <NavButton view="resume" label={uiText[language].nav_resume} />
             <NavButton view="story" label={uiText[language].nav_story} />
             <NavButton view="translation" label={uiText[language].nav_translation} />
             <NavButton view="fitness" label={uiText[language].nav_fitness} />
@@ -174,7 +170,6 @@ const App: React.FC = () => {
         {activeView === 'translation' && <TranslationMode language={language} />}
         {activeView === 'notes' && <StudyNotesGenerator language={language} user={user} />}
         {activeView === 'vocabulary' && <VocabularyBuilder language={language} user={user} />}
-        {activeView === 'resume' && <ResumeBuilder language={language} />}
         {activeView === 'group' && <GroupStudy user={user}/>}
         {activeView === 'exam' && <ExamPracticeMode language={language} />}
         {activeView === 'quiz' && <SmartQuizGenerator language={language} />}
