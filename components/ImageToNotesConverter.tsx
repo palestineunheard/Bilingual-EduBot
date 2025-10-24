@@ -1,6 +1,5 @@
-
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
-import { GoogleGenAI } from '@google/genai';
+import { GenerateContentResponse } from '@google/genai';
 import { Language } from '../types';
 import { UploadIcon, ArrowPathIcon, DocumentTextIcon, SpinnerIcon, BoldIcon, ItalicIcon, UnderlineIcon } from './icons';
 import { Notification } from './Notification';
@@ -13,6 +12,21 @@ type Stage = 'idle' | 'analyzing' | 'done';
 
 interface ImageToNotesConverterProps {
     language: Language;
+}
+
+// Helper for serverless API calls
+async function generateContent(body: object): Promise<GenerateContentResponse> {
+    const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    });
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'API request failed with no details.' }));
+        console.error('API Error Response:', errorData);
+        throw new Error(errorData.error || 'API request failed');
+    }
+    return response.json();
 }
 
 const blobToBase64 = (blob: Blob): Promise<string> => {
@@ -35,8 +49,6 @@ export const ImageToNotesConverter: React.FC<ImageToNotesConverterProps> = ({ la
     const [error, setError] = useState<string | null>(null);
     const dropzoneRef = useRef<HTMLDivElement>(null);
     const editorRef = useRef<HTMLDivElement>(null);
-
-    const ai = useMemo(() => new GoogleGenAI({ apiKey: process.env.API_KEY! }), []);
 
     const uiText = useMemo(() => ({
         [Language.EN]: {
@@ -145,7 +157,7 @@ export const ImageToNotesConverter: React.FC<ImageToNotesConverterProps> = ({ la
 - After the notes, add a section called "Potential Questions" (### Potential Questions) and list 3-4 insightful questions a student might ask about this material to deepen their understanding.
 - If the text is in Urdu, ensure the entire response is also in Urdu with correct formatting.`;
             
-            const response = await ai.models.generateContent({
+            const response = await generateContent({
                 model: 'gemini-2.5-flash',
                 contents: {
                     parts: [

@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useRef } from 'react';
-import { GoogleGenAI, Part } from '@google/genai';
+import { GenerateContentResponse, Part } from '@google/genai';
 import { Language } from '../types';
 import { Notification } from './Notification';
 import { UploadIcon, SpinnerIcon } from './icons';
@@ -8,6 +8,21 @@ declare const marked: any;
 
 interface VideoAnalyzerProps {
     language: Language;
+}
+
+// Helper for serverless API calls
+async function generateContent(body: object): Promise<GenerateContentResponse> {
+    const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    });
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'API request failed with no details.' }));
+        console.error('API Error Response:', errorData);
+        throw new Error(errorData.error || 'API request failed');
+    }
+    return response.json();
 }
 
 const FRAME_CAPTURE_INTERVAL = 1000; // Capture a frame every 1 second
@@ -23,8 +38,6 @@ export const VideoAnalyzer: React.FC<VideoAnalyzerProps> = ({ language }) => {
     const [error, setError] = useState<string | null>(null);
     const videoRef = useRef<HTMLVideoElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
-
-    const ai = useMemo(() => new GoogleGenAI({ apiKey: process.env.API_KEY! }), []);
 
     const uiText = useMemo(() => ({
         [Language.EN]: {
@@ -140,7 +153,7 @@ export const VideoAnalyzer: React.FC<VideoAnalyzerProps> = ({ language }) => {
                 { text: `Based on these video frames, answer the following educational question in ${language === Language.EN ? 'English' : 'Urdu'}: ${prompt}` }
             ];
 
-            const result = await ai.models.generateContent({
+            const result = await generateContent({
                 model: 'gemini-2.5-flash',
                 contents: { parts: allParts }
             });

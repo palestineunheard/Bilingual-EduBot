@@ -1,6 +1,5 @@
-
 import React, { useState, useMemo, useEffect } from 'react';
-import { GoogleGenAI, Type } from '@google/genai';
+import { GenerateContentResponse, Type } from '@google/genai';
 import { Language, ExamQuestion } from '../types';
 import { Notification } from './Notification';
 import { SpinnerIcon, ArrowPathIcon, QuestionMarkCircleIcon } from './icons';
@@ -13,14 +12,27 @@ interface QuizData {
     quiz: ExamQuestion[];
 }
 
+// Helper for serverless API calls
+async function generateContent(body: object): Promise<GenerateContentResponse> {
+    const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    });
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'API request failed with no details.' }));
+        console.error('API Error Response:', errorData);
+        throw new Error(errorData.error || 'API request failed');
+    }
+    return response.json();
+}
+
 export const SmartQuizGenerator: React.FC<SmartQuizGeneratorProps> = ({ language }) => {
     const [notesText, setNotesText] = useState<string>('');
     const [quiz, setQuiz] = useState<QuizData | null>(null);
     const [stage, setStage] = useState<'input' | 'generating' | 'results'>('input');
     const [error, setError] = useState<string | null>(null);
     const [revealedAnswers, setRevealedAnswers] = useState<Set<number>>(new Set());
-
-    const ai = useMemo(() => new GoogleGenAI({ apiKey: process.env.API_KEY! }), []);
 
     const uiText = useMemo(() => ({
         [Language.EN]: {
@@ -115,7 +127,7 @@ Notes:
 ${notesText}
 """`;
 
-            const response = await ai.models.generateContent({
+            const response = await generateContent({
                 model: 'gemini-2.5-flash',
                 contents: prompt,
                 config: {

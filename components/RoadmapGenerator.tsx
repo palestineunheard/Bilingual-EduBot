@@ -1,6 +1,5 @@
-
 import React, { useState, useMemo, useEffect } from 'react';
-import { GoogleGenAI, Type } from '@google/genai';
+import { GenerateContentResponse, Type } from '@google/genai';
 import { Language, Roadmap } from '../types';
 import { Notification } from './Notification';
 import { UploadIcon, ExportIcon, SpinnerIcon } from './icons';
@@ -15,6 +14,21 @@ interface RoadmapGeneratorProps {
     language: Language;
 }
 
+// Helper for serverless API calls
+async function generateContent(body: object): Promise<GenerateContentResponse> {
+    const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    });
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'API request failed with no details.' }));
+        console.error('API Error Response:', errorData);
+        throw new Error(errorData.error || 'API request failed');
+    }
+    return response.json();
+}
+
 export const RoadmapGenerator: React.FC<RoadmapGeneratorProps> = ({ language }) => {
     const [stage, setStage] = useState<Stage>('input');
     const [syllabusText, setSyllabusText] = useState<string>('');
@@ -24,8 +38,6 @@ export const RoadmapGenerator: React.FC<RoadmapGeneratorProps> = ({ language }) 
     const [roadmap, setRoadmap] = useState<Roadmap | null>(null);
     
     const [error, setError] = useState<string | null>(null);
-
-    const ai = useMemo(() => new GoogleGenAI({ apiKey: process.env.API_KEY! }), []);
 
     const uiText = useMemo(() => ({
         [Language.EN]: {
@@ -172,7 +184,7 @@ export const RoadmapGenerator: React.FC<RoadmapGeneratorProps> = ({ language }) 
                 required: ['title', 'days']
             };
 
-            const response = await ai.models.generateContent({
+            const response = await generateContent({
                 model: 'gemini-2.5-pro',
                 contents: `Analyze the provided syllabus and create a structured, realistic study plan for ${numDays} days.
 - The plan should logically divide all topics from the syllabus across the ${numDays} days.

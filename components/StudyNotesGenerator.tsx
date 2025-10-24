@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
-import { GoogleGenAI, Type } from '@google/genai';
+import { GenerateContentResponse, Type } from '@google/genai';
 import { User } from 'firebase/auth';
 import { db } from '../firebaseConfig';
 import { collection, addDoc, onSnapshot, doc, deleteDoc, query, orderBy, serverTimestamp, updateDoc } from 'firebase/firestore';
@@ -29,6 +28,21 @@ interface StudyNotesGeneratorProps {
   user: User;
 }
 
+// Helper for serverless API calls
+async function generateContent(body: object): Promise<GenerateContentResponse> {
+    const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    });
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'API request failed with no details.' }));
+        console.error('API Error Response:', errorData);
+        throw new Error(errorData.error || 'API request failed');
+    }
+    return response.json();
+}
+
 export const StudyNotesGenerator: React.FC<StudyNotesGeneratorProps> = ({ language, user }) => {
   const [inputText, setInputText] = useState<string>('');
   const [savedMaterials, setSavedMaterials] = useState<SavedStudyMaterial[]>([]);
@@ -38,8 +52,6 @@ export const StudyNotesGenerator: React.FC<StudyNotesGeneratorProps> = ({ langua
   const [error, setError] = useState<string | null>(null);
   const [revealedFlashcards, setRevealedFlashcards] = useState<Set<number>>(new Set());
   const [activeTab, setActiveTab] = useState<ActiveTab>('flashcards');
-
-  const ai = useMemo(() => new GoogleGenAI({ apiKey: process.env.API_KEY! }), []);
 
   const uiText = useMemo(() => ({
     [Language.EN]: {
@@ -117,7 +129,7 @@ export const StudyNotesGenerator: React.FC<StudyNotesGeneratorProps> = ({ langua
     setRevealedFlashcards(new Set());
 
     try {
-      const notesResponse = await ai.models.generateContent({
+      const notesResponse = await generateContent({
         model: 'gemini-2.5-flash',
         contents: `Act as an expert educator. From the following text, create detailed, well-structured study notes.
         - The notes MUST be in ${language === Language.EN ? 'English' : 'Urdu'}.
@@ -164,7 +176,7 @@ export const StudyNotesGenerator: React.FC<StudyNotesGeneratorProps> = ({ langua
     const notesText = activeMaterial.notes.join('\n');
 
     try {
-      const response = await ai.models.generateContent({
+      const response = await generateContent({
         model: 'gemini-2.5-flash',
         contents: `Based on these study notes, create question and answer pairs for flashcards. The questions should test key concepts from the notes. Respond in ${language === Language.EN ? 'English' : 'Urdu'}. Notes: "${notesText}"`,
         config: {
@@ -201,7 +213,7 @@ export const StudyNotesGenerator: React.FC<StudyNotesGeneratorProps> = ({ langua
     const notesText = activeMaterial.notes.join('\n');
 
     try {
-      const response = await ai.models.generateContent({
+      const response = await generateContent({
         model: 'gemini-2.5-pro',
         contents: `Analyze these study notes and convert them into a hierarchical mind map JSON structure. Create a central root node for the main topic, with main ideas as primary branches and details as sub-branches. The mind map must be in ${language === Language.EN ? 'English' : 'Urdu'}. Notes: "${notesText}"`,
         config: {

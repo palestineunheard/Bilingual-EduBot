@@ -1,6 +1,5 @@
-
 import React, { useState, useMemo } from 'react';
-import { GoogleGenAI, Type } from '@google/genai';
+import { GenerateContentResponse, Type } from '@google/genai';
 import { Language } from '../types';
 import { CodeBracketIcon, BugAntIcon, LightbulbIcon, SparklesIcon, SpinnerIcon } from './icons';
 import { Notification } from './Notification';
@@ -18,6 +17,21 @@ interface CodeTutorProps {
 type CodeLanguage = 'python' | 'cpp' | 'java';
 type AiAction = 'explain' | 'debug' | 'optimize' | 'exercise' | 'feedback';
 
+// Helper for serverless API calls
+async function generateContent(body: object): Promise<GenerateContentResponse> {
+    const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    });
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'API request failed with no details.' }));
+        console.error('API Error Response:', errorData);
+        throw new Error(errorData.error || 'API request failed');
+    }
+    return response.json();
+}
+
 export const CodeTutor: React.FC<CodeTutorProps> = ({ language }) => {
     const [code, setCode] = useState('');
     const [selectedLang, setSelectedLang] = useState<CodeLanguage>('python');
@@ -28,8 +42,6 @@ export const CodeTutor: React.FC<CodeTutorProps> = ({ language }) => {
     // Mini-exercise state
     const [exercise, setExercise] = useState<{ prompt: string, starterCode: string } | null>(null);
     const [solution, setSolution] = useState('');
-
-    const ai = useMemo(() => new GoogleGenAI({ apiKey: process.env.API_KEY! }), []);
 
     const uiText = useMemo(() => ({
         [Language.EN]: {
@@ -115,7 +127,7 @@ export const CodeTutor: React.FC<CodeTutorProps> = ({ language }) => {
         }
 
         try {
-            const response = await ai.models.generateContent({
+            const response = await generateContent({
                 model: model,
                 contents: prompt,
                 config: config
@@ -141,7 +153,7 @@ export const CodeTutor: React.FC<CodeTutorProps> = ({ language }) => {
         const prompt = `Generate a simple, beginner-friendly coding exercise in ${langName}. The exercise should cover a fundamental concept (like loops, arrays, or basic functions). Provide a short 'prompt' in ${uiLangName} and some 'starterCode' in ${langName}.`;
         
         try {
-            const response = await ai.models.generateContent({
+            const response = await generateContent({
                 model: 'gemini-2.5-flash',
                 contents: prompt,
                 config: {

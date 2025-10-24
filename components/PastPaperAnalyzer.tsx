@@ -1,6 +1,5 @@
-
 import React, { useState, useMemo, useCallback, useRef } from 'react';
-import { GoogleGenAI, Type } from '@google/genai';
+import { GenerateContentResponse, Type } from '@google/genai';
 import { Language, AnalysisResult } from '../types';
 import { Notification } from './Notification';
 import { UploadIcon, ArrowPathIcon, SpinnerIcon, DocumentMagnifyingGlassIcon, ChartBarIcon, ExportIcon, XIcon } from './icons';
@@ -18,6 +17,21 @@ interface ParsingProgress {
     file: string;
     status: string;
     progress?: number;
+}
+
+// Helper for serverless API calls
+async function generateContent(body: object): Promise<GenerateContentResponse> {
+    const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    });
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'API request failed with no details.' }));
+        console.error('API Error Response:', errorData);
+        throw new Error(errorData.error || 'API request failed');
+    }
+    return response.json();
 }
 
 const blobToBase64 = (blob: Blob): Promise<string> => {
@@ -40,8 +54,6 @@ export const PastPaperAnalyzer: React.FC<PastPaperAnalyzerProps> = ({ language }
     const [error, setError] = useState<string | null>(null);
     const dropzoneRef = useRef<HTMLDivElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
-
-    const ai = useMemo(() => new GoogleGenAI({ apiKey: process.env.API_KEY! }), []);
 
     const uiText = useMemo(() => ({
         [Language.EN]: {
@@ -126,7 +138,7 @@ export const PastPaperAnalyzer: React.FC<PastPaperAnalyzerProps> = ({ language }
         } else if (file.type.startsWith('image/')) {
             setParsingProgress({ file: file.name, status: `Extracting text from image...` });
             const base64Data = await blobToBase64(file);
-            const response = await ai.models.generateContent({
+            const response = await generateContent({
                 model: 'gemini-2.5-flash',
                 contents: {
                     parts: [
@@ -201,7 +213,7 @@ Combined Text from Papers:
 ${allText}
 """`;
 
-            const response = await ai.models.generateContent({
+            const response = await generateContent({
                 model: 'gemini-2.5-pro',
                 contents: prompt,
                 config: {

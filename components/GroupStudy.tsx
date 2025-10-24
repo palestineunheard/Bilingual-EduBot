@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { GoogleGenAI, Type } from '@google/genai';
+import { GenerateContentResponse, Type } from '@google/genai';
 import { User } from 'firebase/auth';
 import { db } from '../firebaseConfig';
 import { doc, setDoc, onSnapshot, updateDoc, arrayUnion, getDoc, writeBatch, deleteField } from 'firebase/firestore';
@@ -13,6 +13,21 @@ const generateRoomCode = () => `${word1[Math.floor(Math.random()*word1.length)]}
 
 interface GroupStudyProps {
     user: User;
+}
+
+// Helper for serverless API calls
+async function generateContent(body: object): Promise<GenerateContentResponse> {
+    const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    });
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'API request failed with no details.' }));
+        console.error('API Error Response:', errorData);
+        throw new Error(errorData.error || 'API request failed');
+    }
+    return response.json();
 }
 
 export const GroupStudy: React.FC<GroupStudyProps> = ({ user }) => {
@@ -31,7 +46,6 @@ export const GroupStudy: React.FC<GroupStudyProps> = ({ user }) => {
     
     const chatBottomRef = useRef<HTMLDivElement>(null);
     const unsubscribeRef = useRef<() => void | null>(null);
-    const ai = useMemo(() => new GoogleGenAI({ apiKey: process.env.API_KEY! }), []);
 
     const { participants = [], chatMessages = [], sharedNotes = [], sharedFlashcards = [], quizState = null, permissions = {}, hostId = '' } = sessionData || {};
     const isHost = user.uid === hostId;
@@ -186,7 +200,7 @@ export const GroupStudy: React.FC<GroupStudyProps> = ({ user }) => {
         setIsLoading(true);
         setError(null);
         try {
-            const notesResponse = await ai.models.generateContent({
+            const notesResponse = await generateContent({
                 model: 'gemini-2.5-flash',
                 contents: `From the following text, create detailed, well-structured study notes. Use Markdown for clear formatting (headings, lists, bold text). The notes should be easy for a group to study from. Text: "${notesInput}"`,
                 config: {

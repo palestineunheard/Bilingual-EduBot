@@ -1,6 +1,5 @@
-
 import React, { useState, useMemo } from 'react';
-import { GoogleGenAI } from '@google/genai';
+import { GenerateContentResponse } from '@google/genai';
 import { Language } from '../types';
 import { Notification } from './Notification';
 import { BodyIcon, EyeIcon, SparklesIcon, SpinnerIcon } from './icons';
@@ -14,12 +13,25 @@ interface StudyFitnessCoachProps {
 
 type RoutineType = 'stretch' | 'eye';
 
+// Helper for serverless API calls
+async function generateContent(body: object): Promise<GenerateContentResponse> {
+    const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    });
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'API request failed with no details.' }));
+        console.error('API Error Response:', errorData);
+        throw new Error(errorData.error || 'API request failed');
+    }
+    return response.json();
+}
+
 export const StudyFitnessCoach: React.FC<StudyFitnessCoachProps> = ({ language }) => {
     const [routine, setRoutine] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
-
-    const ai = useMemo(() => new GoogleGenAI({ apiKey: process.env.API_KEY! }), []);
 
     const uiText = useMemo(() => ({
         [Language.EN]: {
@@ -67,7 +79,7 @@ export const StudyFitnessCoach: React.FC<StudyFitnessCoachProps> = ({ language }
         }
 
         try {
-            const response = await ai.models.generateContent({
+            const response = await generateContent({
                 model: 'gemini-2.5-flash',
                 contents: prompt,
             });

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { GoogleGenAI, Type } from '@google/genai';
+import { GenerateContentResponse, Type } from '@google/genai';
 import { ExamQuestion, UserAnswer, Language } from '../types';
 import { Notification } from './Notification';
 import { UploadIcon, TimerIcon, CheckCircleIcon, XCircleIcon } from './icons';
@@ -13,6 +13,21 @@ const EXAM_TIME_LIMIT = 30; // seconds per question
 
 interface ExamPracticeModeProps {
     language: Language;
+}
+
+// Helper for serverless API calls
+async function generateContent(body: object): Promise<GenerateContentResponse> {
+    const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    });
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'API request failed with no details.' }));
+        console.error('API Error Response:', errorData);
+        throw new Error(errorData.error || 'API request failed');
+    }
+    return response.json();
 }
 
 export const ExamPracticeMode: React.FC<ExamPracticeModeProps> = ({ language }) => {
@@ -30,10 +45,7 @@ export const ExamPracticeMode: React.FC<ExamPracticeModeProps> = ({ language }) 
     const [timer, setTimer] = useState<number>(EXAM_TIME_LIMIT);
     
     const [error, setError] = useState<string | null>(null);
-    // FIX: Use ReturnType<typeof setInterval> for the timer ref type, which is browser-compatible.
     const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-    const ai = useMemo(() => new GoogleGenAI({ apiKey: process.env.API_KEY! }), []);
 
     const uiText = useMemo(() => ({
         [Language.EN]: {
@@ -240,7 +252,7 @@ export const ExamPracticeMode: React.FC<ExamPracticeModeProps> = ({ language }) 
                 required: ['questions']
             };
 
-            const response = await ai.models.generateContent({
+            const response = await generateContent({
                 model: 'gemini-2.5-flash',
                 contents: `Based on the provided study material, generate an exam with exactly ${numQuestions} questions.
 - Question types should be ${examType === 'mixed' ? 'a mix of Multiple Choice (mcq), True/False (true_false), and Short Answer (short_answer)' : 'Multiple Choice (mcq) only'}.

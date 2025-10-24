@@ -1,6 +1,5 @@
-
 import React, { useState, useMemo, useEffect } from 'react';
-import { GoogleGenAI } from '@google/genai';
+import { GenerateContentResponse } from '@google/genai';
 import { Language } from '../types';
 import { Notification } from './Notification';
 import { ArrowPathIcon, ClipboardCopyIcon, ExportIcon, SpinnerIcon } from './icons';
@@ -14,6 +13,21 @@ interface TranslationModeProps {
 
 type TranslationStyle = 'academic' | 'casual';
 
+// Helper for serverless API calls
+async function generateContent(body: object): Promise<GenerateContentResponse> {
+    const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    });
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'API request failed with no details.' }));
+        console.error('API Error Response:', errorData);
+        throw new Error(errorData.error || 'API request failed');
+    }
+    return response.json();
+}
+
 export const TranslationMode: React.FC<TranslationModeProps> = ({ language: uiLanguage }) => {
     const [sourceText, setSourceText] = useState<string>('');
     const [translatedText, setTranslatedText] = useState<string>('');
@@ -23,8 +37,6 @@ export const TranslationMode: React.FC<TranslationModeProps> = ({ language: uiLa
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
     const [notification, setNotification] = useState<string | null>(null);
-
-    const ai = useMemo(() => new GoogleGenAI({ apiKey: process.env.API_KEY! }), []);
 
     const uiText = useMemo(() => ({
         [Language.EN]: {
@@ -104,7 +116,7 @@ Text to translate:
 ${sourceText}
 """`;
 
-            const response = await ai.models.generateContent({
+            const response = await generateContent({
                 model: 'gemini-2.5-flash',
                 contents: prompt,
             });

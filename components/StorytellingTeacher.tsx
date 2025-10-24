@@ -1,6 +1,5 @@
-
 import React, { useState, useMemo } from 'react';
-import { GoogleGenAI, Type, Modality } from '@google/genai';
+import { GenerateContentResponse, Type, Modality } from '@google/genai';
 import { Language } from '../types';
 import { Notification } from './Notification';
 import { BookOpenIcon, ExportIcon, ArrowPathIcon, SpinnerIcon, SpeakerIcon } from './icons';
@@ -38,7 +37,6 @@ async function decodeAudioData(
   return buffer;
 }
 
-
 interface StorytellingTeacherProps {
     language: Language;
 }
@@ -50,14 +48,27 @@ interface StoryContent {
     questions: string[];
 }
 
+// Helper for serverless API calls
+async function generateContent(body: object): Promise<GenerateContentResponse> {
+    const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    });
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'API request failed with no details.' }));
+        console.error('API Error Response:', errorData);
+        throw new Error(errorData.error || 'API request failed');
+    }
+    return response.json();
+}
+
 export const StorytellingTeacher: React.FC<StorytellingTeacherProps> = ({ language }) => {
     const [topic, setTopic] = useState<string>('');
     const [storyContent, setStoryContent] = useState<StoryContent | null>(null);
     const [stage, setStage] = useState<'input' | 'generating' | 'results'>('input');
     const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
-
-    const ai = useMemo(() => new GoogleGenAI({ apiKey: process.env.API_KEY! }), []);
 
     const uiText = useMemo(() => ({
         [Language.EN]: {
@@ -126,7 +137,7 @@ export const StorytellingTeacher: React.FC<StorytellingTeacherProps> = ({ langua
 - The entire response (title, story, moral, questions) must be in ${langName}.
 - Your entire response must be a single, valid JSON object conforming to the provided schema.`;
 
-            const response = await ai.models.generateContent({
+            const response = await generateContent({
                 model: 'gemini-2.5-flash',
                 contents: prompt,
                 config: {
@@ -151,7 +162,7 @@ export const StorytellingTeacher: React.FC<StorytellingTeacherProps> = ({ langua
         setIsSpeaking(true);
         try {
             const textToSpeak = `${storyContent.title}. ${storyContent.story}. The moral of the story is: ${storyContent.moral}`;
-            const response = await ai.models.generateContent({
+            const response = await generateContent({
                 model: "gemini-2.5-flash-preview-tts",
                 contents: [{ parts: [{ text: textToSpeak }] }],
                 config: {

@@ -1,6 +1,5 @@
-
 import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { GoogleGenAI } from '@google/genai';
+import { GenerateContentResponse } from '@google/genai';
 import { Language } from '../types';
 import { Notification } from './Notification';
 import { MicIcon, SpinnerIcon, ClipboardCopyIcon, SparklesIcon } from './icons';
@@ -13,6 +12,21 @@ interface AudioTranscriberProps {
 
 type Stage = 'idle' | 'recording' | 'transcribing' | 'done';
 
+// Helper for serverless API calls
+async function generateContent(body: object): Promise<GenerateContentResponse> {
+    const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    });
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'API request failed with no details.' }));
+        console.error('API Error Response:', errorData);
+        throw new Error(errorData.error || 'API request failed');
+    }
+    return response.json();
+}
+
 export const AudioTranscriber: React.FC<AudioTranscriberProps> = ({ language }) => {
     const [stage, setStage] = useState<Stage>('idle');
     const [transcribedText, setTranscribedText] = useState<string>('');
@@ -22,8 +36,6 @@ export const AudioTranscriber: React.FC<AudioTranscriberProps> = ({ language }) 
     const [notification, setNotification] = useState<string | null>(null);
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const audioChunksRef = useRef<Blob[]>([]);
-
-    const ai = useMemo(() => new GoogleGenAI({ apiKey: process.env.API_KEY! }), []);
 
     const uiText = useMemo(() => ({
         [Language.EN]: {
@@ -96,7 +108,7 @@ export const AudioTranscriber: React.FC<AudioTranscriberProps> = ({ language }) 
                 const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
                 try {
                     const base64Audio = await blobToBase64(audioBlob);
-                    const response = await ai.models.generateContent({
+                    const response = await generateContent({
                         model: 'gemini-2.5-flash',
                         contents: {
                             parts: [
@@ -149,7 +161,7 @@ Transcribed Text:
 ${transcribedText}
 """`;
             
-            const response = await ai.models.generateContent({
+            const response = await generateContent({
                 model: 'gemini-2.5-flash',
                 contents: prompt,
             });

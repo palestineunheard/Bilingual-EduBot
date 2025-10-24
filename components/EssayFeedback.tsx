@@ -1,6 +1,5 @@
-
 import React, { useState, useMemo, useEffect } from 'react';
-import { GoogleGenAI, Type } from '@google/genai';
+import { GenerateContentResponse, Type } from '@google/genai';
 import { Notification } from './Notification';
 import { UploadIcon, SpinnerIcon } from './icons';
 import { Language } from '../types';
@@ -33,6 +32,21 @@ interface EssayFeedbackProps {
     language: Language; // UI Language
 }
 
+// Helper for serverless API calls
+async function generateContent(body: object): Promise<GenerateContentResponse> {
+    const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    });
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'API request failed with no details.' }));
+        console.error('API Error Response:', errorData);
+        throw new Error(errorData.error || 'API request failed');
+    }
+    return response.json();
+}
+
 export const EssayFeedback: React.FC<EssayFeedbackProps> = ({ language }) => {
     const [essayText, setEssayText] = useState<string>('');
     const [feedback, setFeedback] = useState<FeedbackResponse | null>(null);
@@ -41,8 +55,6 @@ export const EssayFeedback: React.FC<EssayFeedbackProps> = ({ language }) => {
     const [parsingStatus, setParsingStatus] = useState<string>('');
     const [error, setError] = useState<string | null>(null);
 
-    const ai = useMemo(() => new GoogleGenAI({ apiKey: process.env.API_KEY! }), []);
-    
     const wordCount = useMemo(() => {
         return essayText.trim().split(/\s+/).filter(Boolean).length;
     }, [essayText]);
@@ -215,7 +227,7 @@ Essay to analyze:
 ${essayText}
 """`;
 
-            const response = await ai.models.generateContent({
+            const response = await generateContent({
                 model: 'gemini-2.5-pro',
                 contents: prompt,
                 config: {
